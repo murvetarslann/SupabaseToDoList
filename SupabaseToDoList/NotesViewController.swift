@@ -135,4 +135,73 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
     }
     
+    // Notu Detaylı Görüntüleme
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let note = notesArray[indexPath.row]
+        
+        let noteDetailAlert = UIAlertController(
+                title: "Note Detail",
+                message: note.content,
+                preferredStyle: .alert
+            )
+        
+        noteDetailAlert.addAction(UIAlertAction(title: "Exit Note Detail", style: .default))
+        present(noteDetailAlert, animated: true)
+    }
+    
+    // Notu Düzenleme
+    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        
+        let editAction = UIContextualAction(style: .normal, title: "Düzenle") { [weak self] _, _, completionHandler in
+            guard let self = self else { return }
+            
+            // Düzenlenecek notun satırını alır
+            let noteToEdit = self.notesArray[indexPath.row]
+            
+            // Düzenleme alert alanı
+            let editAlert = UIAlertController(title: "Edit Note", message: nil, preferredStyle: .alert)
+            editAlert.addTextField { textField in
+                textField.text = noteToEdit.content
+                textField.placeholder = "Note Content"
+            }
+            
+            // Düzenlenen notun kaydolması için basılacak buton
+            let saveAction = UIAlertAction(title: "SAVE", style: .default) { _ in
+                if let newNoteContent = editAlert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !newNoteContent.isEmpty {
+                    
+                    Task {
+                        do {
+                            try await SupabaseManager.shared.client
+                                .from("notes")
+                                .update(["content": newNoteContent])
+                                .eq("id", value: noteToEdit.id)
+                                .execute()
+                            
+                            // Notları yeniden yükle
+                            self.loadNotes()
+                            
+                        } catch {
+                            self.makeAlert(titleInput: "Update Error!", messageInput: error.localizedDescription)
+                        }
+                    }
+                }
+            }
+            
+            editAlert.addAction(saveAction)
+            editAlert.addAction(UIAlertAction(title: "CANCEL", style: .cancel))
+            
+            self.present(editAlert, animated: true)
+            completionHandler(true)
+        }
+        
+        // Sağa kaydırıldığında görünecek butonu rengi mavi ve iconu kalem şeklinde ayarlamak
+        editAction.backgroundColor = .systemBlue
+        editAction.image = UIImage(systemName: "pencil")
+        
+        // Satır kaydırıldığında gösterilecek butonu işaret eder
+        return UISwipeActionsConfiguration(actions: [editAction])
+    }
+    
+    
 }
