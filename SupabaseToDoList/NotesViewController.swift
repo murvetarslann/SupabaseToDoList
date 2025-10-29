@@ -8,25 +8,31 @@
 import UIKit
 import Supabase
 
+
 class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var notesTableView: UITableView!
+    
+    var notes: [Note] = [] // Notları tutmak için array
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         notesTableView.dataSource = self
         notesTableView.delegate = self
+        
+        loadNotes()
 
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
+        return notes.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
-        cell.textLabel?.text = "Deneme"
+        let cell = tableView.dequeueReusableCell(withIdentifier: "NoteCell") ?? UITableViewCell(style: .subtitle, reuseIdentifier: "NoteCell")
+        let note = notes[indexPath.row]
+        cell.textLabel?.text = note.content
         return cell
     }
     
@@ -39,10 +45,21 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
         
         let noteSaveButton = UIAlertAction(title: "Save Note", style: .default) { action in
             if let note = addNoteAlert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty {
-                do{
-                    try print("Note Recorded")
-                } catch {
-                    print("Note Could Not Be Saved")
+                Task {
+                    do {
+                        let user = try await SupabaseManager.shared.client.auth.session.user
+                        let noteData = NoteInsert(
+                            user_id: user.id,
+                            content: note
+                        )
+                        
+                        try await SupabaseManager.shared.client.from("notes").insert(noteData).execute()
+                        print("Not eklendi")
+                        self.loadNotes()
+                        
+                    } catch {
+                        print("Note eklenemedi")
+                    }
                 }
             }
         }
@@ -56,4 +73,30 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.present(addNoteAlert, animated: true, completion: nil)
     }
     
+    func loadNotes() {
+        Task {
+            do {
+                // Giriş yapan kullanıcı alıyoruz
+                let user = try await SupabaseManager.shared.client.auth.session.user
+                
+                // Aldığımız bu kullanıcının notlarını çekiyoruz
+                let response: [Note] = try await SupabaseManager.shared.client
+                    .from("notes")
+                    .select()
+                    .eq("user_id", value: user.id)
+                    .order("created_at", ascending: false)
+                    .execute()
+                    .value
+                
+                // TableView i güncelliyoruz
+                await MainActor.run {
+                    self.notes = response
+                    self.notesTableView.reloadData()
+                }
+                
+            } catch {
+                print("Notlar yüklenemedi: \(error.localizedDescription)")
+            }
+        }
+    }
 }
