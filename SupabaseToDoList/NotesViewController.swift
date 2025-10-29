@@ -13,7 +13,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     @IBOutlet weak var notesTableView: UITableView!
     
-    var notes: [Note] = [] // Notları tutmak için array
+    var notesArray: [Note] = [] // Notları tutmak için array    [Note] -> Structaki Note
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,14 +26,21 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return notes.count
+        return notesArray.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "NoteCell") ?? UITableViewCell(style: .subtitle, reuseIdentifier: "NoteCell")
-        let note = notes[indexPath.row]
+        let note = notesArray[indexPath.row]
         cell.textLabel?.text = note.content
         return cell
+    }
+    
+    func makeAlert(titleInput: String, messageInput: String) {
+        let alert = UIAlertController(title: titleInput, message: messageInput, preferredStyle: UIAlertController.Style.alert)
+        let okeButton = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
+        alert.addAction(okeButton)
+        self.present(alert, animated: true, completion: nil)
     }
     
     @IBAction func addNoteButtonClicked(_ sender: Any) {
@@ -90,7 +97,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 
                 // TableView i güncelliyoruz
                 await MainActor.run {
-                    self.notes = response
+                    self.notesArray = response
                     self.notesTableView.reloadData()
                 }
                 
@@ -99,4 +106,33 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
         }
     }
+    
+    // Not Silem İşlemi
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            
+            // İlk olarak silinecek notun sütununu alacağız    notes -> notları kaydettiğimiz liste
+            let noteToBeDelete = notesArray[indexPath.row]
+            
+            // Sonrasında seçilen notu supabaseden siliyoruz
+            Task {
+                do {
+                    try await SupabaseManager.shared.client
+                        .from("notes")
+                        .delete()
+                        .eq("id", value: noteToBeDelete.id)
+                        .execute()
+                    
+                    // Notu supabaseden sildikten sonra ekranımızı güncelliyoruz
+                    await MainActor.run {
+                        self.notesArray.remove(at: indexPath.row)
+                        notesTableView.deleteRows(at: [indexPath], with: .fade)
+                    }
+                } catch {
+                    self.makeAlert(titleInput: "Delete Error!", messageInput: error.localizedDescription)
+                }
+            }
+        }
+    }
+    
 }
