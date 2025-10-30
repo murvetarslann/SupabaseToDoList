@@ -11,6 +11,8 @@ import Supabase
 class ViewController: UIViewController {
     @IBOutlet weak var passwordText: UITextField!
     @IBOutlet weak var userEmailText: UITextField!
+    @IBOutlet weak var fullNameText: UITextField!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,6 +22,7 @@ class ViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         userEmailText.text = ""
         passwordText.text = ""
+        fullNameText.text = ""
     }
     
     func makeAlert(titleInput: String, messageInput: String) {
@@ -54,14 +57,15 @@ class ViewController: UIViewController {
     
     // Kayıt Ol
     @IBAction func signUpButtonClicked(_ sender: Any) {
-        if userEmailText.text != "" && passwordText.text != "" {
+        if userEmailText.text != "" && passwordText.text != "" && fullNameText.text != "" {
             
             Task {
                 do {
                     
                     try await SupabaseManager.shared.client.auth.signUp(
                         email: userEmailText.text!,
-                        password: passwordText.text!
+                        password: passwordText.text!,
+                        data: ["full_name": .string(fullNameText.text!)]  // ← Full name metadata'ya kaydediliyor
                     )
                     
                     //Kayıt olan kullanıcı direkt giriş yapsın
@@ -82,7 +86,7 @@ class ViewController: UIViewController {
             }
             
         } else {
-            makeAlert(titleInput: "ERROR!", messageInput: "Username/Password?")
+            makeAlert(titleInput: "ERROR!", messageInput: "Username/Password/Full Name?")
         }
     }
     
