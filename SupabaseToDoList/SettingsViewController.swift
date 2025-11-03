@@ -8,13 +8,20 @@
 import UIKit
 import Supabase
 
-class SettingsViewController: UIViewController {
+class SettingsViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    @IBOutlet weak var userEmailLabel: UILabel!
+    @IBOutlet weak var userProfileImage: UIImageView!
     @IBOutlet weak var creationDateLabel: UILabel!
-    @IBOutlet weak var emailText: UITextField!
     @IBOutlet weak var fullNameText: UITextField!
+    
+    var selectedImage: UIImage? // Seçilen profil fotoğrafını saklayacağım değişken
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        userProfileImage.isUserInteractionEnabled = true
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(chooseImage))
+        userProfileImage.addGestureRecognizer(gestureRecognizer)
         
         loadUserInformation()
     }
@@ -55,7 +62,7 @@ class SettingsViewController: UIViewController {
                 
                 await MainActor.run {
                     fullNameText.text = receivedFullName
-                    emailText.text = receivedEmail
+                    userEmailLabel.text = receivedEmail
                     creationDateLabel.text = formatDate(receivedCreatedAt)
                 }
             } catch {
@@ -78,6 +85,39 @@ class SettingsViewController: UIViewController {
         Supabase'de kullanıcı kayıt olurken email ve şifre zorunlu, ama başka bilgiler de eklenebilir. Bu ekstra bilgiler userMetadata'da saklanır. Çünkü Supabase Auth tablosu sadece kimlik
         doğrulama için tasarlanmıştır.
      */
+    
+    @objc func chooseImage() {
+        let pickerController = UIImagePickerController()
+        pickerController.delegate = self
+        pickerController.sourceType = .photoLibrary
+        present(pickerController, animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        userProfileImage.image = info[.originalImage] as? UIImage
+        selectedImage = info[.originalImage] as? UIImage // Galeriden seçilen görseli "selectedImage" değişkenine atıyoruz
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func saveChangesButtonClicked(_ sender: Any) {
+        guard let fullName = fullNameText.text?.trimmingCharacters(in: .whitespacesAndNewlines), !fullName.isEmpty else {
+            makeAlert(titleInput: "ERROR!", messageInput: "Full Name Cannot Be Empty!")
+            return
+        }
+        
+        Task {
+            do {
+                try await SupabaseManager.shared.client.auth.update(
+                    user: UserAttributes(
+                        data: ["full_name": .string(fullName)]
+                    )
+                )
+                makeAlert(titleInput: "SUCCESS", messageInput: "Full Name has been changed")
+            } catch {
+                makeAlert(titleInput: "ERROR!", messageInput: error.localizedDescription)
+            }
+        }
+    }
     
     
 }

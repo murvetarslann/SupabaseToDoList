@@ -82,26 +82,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Full Name" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="fNL-5K-VnF">
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Full Name" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="fNL-5K-VnF">
                                 <rect key="frame" x="46" y="438" width="301" height="34"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="34" id="7bh-Kl-N5R"/>
+                                    <constraint firstAttribute="height" constant="34" id="acd-VY-YWH"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email" textAlignment="center" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="oeX-ac-Oux">
-                                <rect key="frame" x="46" y="507" width="301" height="34"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="34" id="D1z-NZ-Wlr"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Account Creation Date" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ixz-Fc-1GX">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Account Creation Date" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ixz-Fc-1GX">
                                 <rect key="frame" x="46" y="573" width="301" height="34"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="34" id="c6k-6L-Grh"/>
+                                    <constraint firstAttribute="height" constant="34" id="njl-VW-vBK"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
@@ -110,15 +102,18 @@
                             <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vuh-2o-shs">
                                 <rect key="frame" x="130" y="662" width="134" height="43"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="43" id="JpF-uy-vTJ"/>
+                                    <constraint firstAttribute="height" constant="43" id="G5o-l3-79M"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Save Changes"/>
+                                <connections>
+                                    <action selector="saveChangesButtonClicked:" destination="aXt-oK-e00" eventType="touchUpInside" id="6Lu-ee-G0O"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jx7-bW-ijZ">
                                 <rect key="frame" x="336" y="59" width="41" height="39"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="39" id="PLf-iu-gTI"/>
+                                    <constraint firstAttribute="height" constant="39" id="Vb0-N3-fwf"/>
                                 </constraints>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" image="rectangle.portrait.and.arrow.right" catalog="system"/>
@@ -126,39 +121,49 @@
                                     <action selector="logOutButtonClickedd:" destination="aXt-oK-e00" eventType="touchUpInside" id="xb2-v7-fa0"/>
                                 </connections>
                             </button>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="select" translatesAutoresizingMaskIntoConstraints="NO" id="XsU-WX-0C7">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="select" translatesAutoresizingMaskIntoConstraints="NO" id="XsU-WX-0C7">
                                 <rect key="frame" x="66" y="137" width="263" height="256"/>
                             </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Email" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="FxV-p5-ezw">
+                                <rect key="frame" x="47" y="503" width="301" height="34"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="34" id="G8N-h4-5iw"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="olP-vn-PKI"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="fNL-5K-VnF" firstAttribute="leading" secondItem="oeX-ac-Oux" secondAttribute="leading" id="3sl-ta-gbf"/>
-                            <constraint firstItem="ixz-Fc-1GX" firstAttribute="top" secondItem="oeX-ac-Oux" secondAttribute="bottom" constant="32" id="9pW-rS-yWR"/>
-                            <constraint firstItem="XsU-WX-0C7" firstAttribute="centerX" secondItem="Vuh-2o-shs" secondAttribute="centerX" id="Bmd-ZM-mC6"/>
-                            <constraint firstItem="oeX-ac-Oux" firstAttribute="trailing" secondItem="ixz-Fc-1GX" secondAttribute="trailing" id="DgS-DN-bBy"/>
-                            <constraint firstItem="olP-vn-PKI" firstAttribute="trailing" secondItem="XsU-WX-0C7" secondAttribute="trailing" constant="64" id="Pg4-yR-705"/>
-                            <constraint firstItem="olP-vn-PKI" firstAttribute="bottom" secondItem="Vuh-2o-shs" secondAttribute="bottom" constant="64" id="Sbz-YO-WSL"/>
-                            <constraint firstItem="Vuh-2o-shs" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="130" id="TBR-vO-vf2"/>
-                            <constraint firstItem="XsU-WX-0C7" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="66" id="Tbn-4p-49h"/>
-                            <constraint firstItem="ixz-Fc-1GX" firstAttribute="centerX" secondItem="Vuh-2o-shs" secondAttribute="centerX" id="Zje-KC-O3U"/>
-                            <constraint firstItem="jx7-bW-ijZ" firstAttribute="top" secondItem="olP-vn-PKI" secondAttribute="top" id="aSA-OC-VtM"/>
-                            <constraint firstItem="oeX-ac-Oux" firstAttribute="top" secondItem="fNL-5K-VnF" secondAttribute="bottom" constant="35" id="dQJ-52-eQ6"/>
-                            <constraint firstItem="jx7-bW-ijZ" firstAttribute="trailing" secondItem="Ydq-T4-eFn" secondAttribute="trailingMargin" id="gaC-DI-Nvx"/>
-                            <constraint firstItem="XsU-WX-0C7" firstAttribute="top" secondItem="olP-vn-PKI" secondAttribute="top" constant="78" id="iIc-hy-gSF"/>
-                            <constraint firstItem="Vuh-2o-shs" firstAttribute="top" secondItem="ixz-Fc-1GX" secondAttribute="bottom" constant="55" id="iZ0-FW-Etd"/>
-                            <constraint firstItem="fNL-5K-VnF" firstAttribute="top" secondItem="XsU-WX-0C7" secondAttribute="bottom" constant="45" id="nac-LO-3bR"/>
-                            <constraint firstItem="fNL-5K-VnF" firstAttribute="trailing" secondItem="oeX-ac-Oux" secondAttribute="trailing" id="quQ-IR-Vej"/>
-                            <constraint firstItem="fNL-5K-VnF" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="46" id="rz0-2g-Fgu"/>
-                            <constraint firstItem="oeX-ac-Oux" firstAttribute="leading" secondItem="ixz-Fc-1GX" secondAttribute="leading" id="xsd-JN-H3d"/>
-                            <constraint firstItem="jx7-bW-ijZ" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="336" id="z4U-4S-WIg"/>
+                            <constraint firstItem="FxV-p5-ezw" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="47" id="CHL-Tf-B4C"/>
+                            <constraint firstItem="fNL-5K-VnF" firstAttribute="top" secondItem="XsU-WX-0C7" secondAttribute="bottom" constant="45" id="Ezn-J4-cED"/>
+                            <constraint firstItem="Vuh-2o-shs" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="130" id="KFg-9E-zxT"/>
+                            <constraint firstItem="XsU-WX-0C7" firstAttribute="centerX" secondItem="FxV-p5-ezw" secondAttribute="centerX" id="P8n-ha-0iu"/>
+                            <constraint firstItem="fNL-5K-VnF" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="46" id="Q0B-Aj-uM7"/>
+                            <constraint firstItem="ixz-Fc-1GX" firstAttribute="centerX" secondItem="Vuh-2o-shs" secondAttribute="centerX" id="S72-VM-Xx6"/>
+                            <constraint firstItem="Vuh-2o-shs" firstAttribute="top" secondItem="ixz-Fc-1GX" secondAttribute="bottom" constant="55" id="Sh1-cZ-Nk8"/>
+                            <constraint firstItem="jx7-bW-ijZ" firstAttribute="top" secondItem="olP-vn-PKI" secondAttribute="top" id="YC0-I5-vyo"/>
+                            <constraint firstItem="ixz-Fc-1GX" firstAttribute="top" secondItem="FxV-p5-ezw" secondAttribute="bottom" constant="36" id="YgE-nO-KBJ"/>
+                            <constraint firstItem="fNL-5K-VnF" firstAttribute="leading" secondItem="ixz-Fc-1GX" secondAttribute="leading" id="Yzw-kE-xef"/>
+                            <constraint firstItem="jx7-bW-ijZ" firstAttribute="trailing" secondItem="Ydq-T4-eFn" secondAttribute="trailingMargin" id="ZZt-4E-sRU"/>
+                            <constraint firstItem="FxV-p5-ezw" firstAttribute="top" secondItem="fNL-5K-VnF" secondAttribute="bottom" constant="31" id="k6o-Pa-M3D"/>
+                            <constraint firstItem="fNL-5K-VnF" firstAttribute="centerX" secondItem="Ydq-T4-eFn" secondAttribute="centerX" id="kwh-w6-MpQ"/>
+                            <constraint firstItem="fNL-5K-VnF" firstAttribute="trailing" secondItem="ixz-Fc-1GX" secondAttribute="trailing" id="l0t-NL-tdb"/>
+                            <constraint firstItem="XsU-WX-0C7" firstAttribute="top" secondItem="olP-vn-PKI" secondAttribute="top" constant="78" id="mM1-It-s8a"/>
+                            <constraint firstItem="jx7-bW-ijZ" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="336" id="oYB-YF-UET"/>
+                            <constraint firstItem="FxV-p5-ezw" firstAttribute="centerX" secondItem="Vuh-2o-shs" secondAttribute="centerX" id="q6w-8v-PGv"/>
+                            <constraint firstItem="olP-vn-PKI" firstAttribute="bottom" secondItem="Vuh-2o-shs" secondAttribute="bottom" constant="64" id="rLI-dr-qIW"/>
+                            <constraint firstItem="XsU-WX-0C7" firstAttribute="leading" secondItem="olP-vn-PKI" secondAttribute="leading" constant="66" id="siw-7n-yEK"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Settings" image="s.circle.fill" catalog="system" id="52f-8I-wNZ"/>
                     <connections>
                         <outlet property="creationDateLabel" destination="ixz-Fc-1GX" id="v26-yG-3ih"/>
-                        <outlet property="emailText" destination="oeX-ac-Oux" id="Htw-Hi-IG6"/>
                         <outlet property="fullNameText" destination="fNL-5K-VnF" id="tKK-4c-8SW"/>
+                        <outlet property="userEmailLabel" destination="FxV-p5-ezw" id="d6S-T0-f2R"/>
+                        <outlet property="userProfileImage" destination="XsU-WX-0C7" id="WVq-Ru-EM8"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ptr-s2-xoQ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

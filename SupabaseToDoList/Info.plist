@@ -11,10 +11,14 @@
 	<string></string>
 	<key>CFBundleExecutable</key>
 	<string></string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Can I see your gallery to upload profile photo to the app?</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsTabbedSceneCollection</key>
 		<false/>
+		<key>UIApplicationPreferredDefaultSceneSessionRole</key>
+		<string>UIWindowSceneSessionRoleApplication</string>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 		<key>UISceneConfigurations</key>
