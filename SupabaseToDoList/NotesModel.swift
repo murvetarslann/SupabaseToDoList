@@ -14,10 +14,12 @@ struct Note: Codable, Identifiable {
     let content: String
     let created_at: String?
     let updated_at: String?
+    let is_pinned: Bool?
 }
 
 // Supabase e yazılan notları okumak için
 struct NoteInsert: Encodable {
     let user_id: UUID
     let content: String
+    let is_pinned: Bool?
 }

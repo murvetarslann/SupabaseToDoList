@@ -22,6 +22,10 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
         notesTableView.delegate = self
         
         loadNotes()
+        
+        // Uzun basma için gestureRecognizeri oluşturma
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress))
+        notesTableView.addGestureRecognizer(longPress)
 
     }
     
@@ -33,6 +37,13 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let cell = tableView.dequeueReusableCell(withIdentifier: "NoteCell") ?? UITableViewCell(style: .subtitle, reuseIdentifier: "NoteCell")
         let note = notesArray[indexPath.row]
         cell.textLabel?.text = note.content
+        
+        if note.is_pinned == true {
+            cell.imageView?.image = UIImage(systemName: "pin.fill")
+            cell.imageView?.tintColor = .systemBlue
+        } else {
+            cell.imageView?.image = nil
+        }
         return cell
     }
     
@@ -57,7 +68,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         let user = try await SupabaseManager.shared.client.auth.session.user
                         let noteData = NoteInsert(
                             user_id: user.id,
-                            content: note
+                            content: note, is_pinned: false // *
                         )
                         
                         try await SupabaseManager.shared.client.from("notes").insert(noteData).execute()
@@ -91,6 +102,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     .from("notes")
                     .select()
                     .eq("user_id", value: user.id)
+                    .order("is_pinned", ascending: false)
                     .order("created_at", ascending: false)
                     .execute()
                     .value
@@ -111,7 +123,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             
-            // İlk olarak silinecek notun sütununu alacağız    notes -> notları kaydettiğimiz liste
+            // İlk olarak silinecek notun satırını alacağız    notes -> notları kaydettiğimiz liste
             let noteToBeDelete = notesArray[indexPath.row]
             
             // Sonrasında seçilen notu supabaseden siliyoruz
@@ -203,5 +215,40 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
         return UISwipeActionsConfiguration(actions: [editAction])
     }
     
+    // Uzun basılan satırdaki notu alır ve togglePin (pin değiştirme) fonksiyonuna gönderir
+    @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            let point = gesture.location(in: notesTableView)
+            if let indexPath = notesTableView.indexPathForRow(at: point) {
+                let note = notesArray[indexPath.row]
+                togglePin(for: note)
+            }
+        }
+    }
+    
+    // Pin durumunu tersine çevirir
+    func togglePin(for note: Note) {
+        let currentPinStatus = note.is_pinned ?? false
+        let newPinStatus = !currentPinStatus
+        
+        Task {
+            do {
+                try await SupabaseManager.shared.client
+                    .from("notes")
+                    .update(["is_pinned": newPinStatus])
+                    .eq("id", value: note.id)
+                    .execute()
+                
+                await MainActor.run {
+                    loadNotes()
+                }
+                
+            } catch {
+                await MainActor.run {
+                    makeAlert(titleInput: "Error", messageInput: error.localizedDescription)
+                }
+            }
+        }
+    }
     
 }
