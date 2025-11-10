@@ -137,8 +137,11 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     
                     // Notu supabaseden sildikten sonra ekranımızı güncelliyoruz
                     await MainActor.run {
-                        self.notesArray.remove(at: indexPath.row)
-                        notesTableView.deleteRows(at: [indexPath], with: .fade)
+                        if let index = self.notesArray.firstIndex(where: { note in return note.id == noteToBeDelete.id }) {
+                            self.notesArray.remove(at: index)
+                            let indexPathToDelete = IndexPath(row: index, section:0)
+                            notesTableView.deleteRows(at: [indexPathToDelete], with: .fade)
+                        }
                     }
                 } catch {
                     self.makeAlert(titleInput: "Delete Error!", messageInput: error.localizedDescription)
