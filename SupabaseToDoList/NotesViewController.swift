@@ -34,7 +34,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "NoteCell") ?? UITableViewCell(style: .subtitle, reuseIdentifier: "NoteCell")
+        let cell = UITableViewCell(style: .value1, reuseIdentifier: "NoteCell")
         let note = notesArray[indexPath.row]
         cell.textLabel?.text = note.content
         
@@ -44,6 +44,21 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
         } else {
             cell.imageView?.image = nil
         }
+        
+        // Sağ taraf: Öncelik ikonu
+        let priority = note.priority ?? "normal"
+        
+        switch priority {
+        case "urgent":
+            cell.detailTextLabel?.text = "🔴"
+        case "important":
+            cell.detailTextLabel?.text = "🟠"
+        case "normal":
+            cell.detailTextLabel?.text = "⚪"
+        default:
+            cell.detailTextLabel?.text = ""
+        }
+        
         return cell
     }
     
@@ -61,24 +76,10 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
             noteTextField.placeholder = "Write a note"
         }
         
-        let noteSaveButton = UIAlertAction(title: "Save Note", style: .default) { action in
+        let nextButton = UIAlertAction(title: "Next", style: .default) { [weak self] action in // Buton ismini Save yerine Next olarak ayarladım
             if let note = addNoteAlert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !note.isEmpty {
-                Task {
-                    do {
-                        let user = try await SupabaseManager.shared.client.auth.session.user
-                        let noteData = NoteInsert(
-                            user_id: user.id,
-                            content: note, is_pinned: false // *
-                        )
-                        
-                        try await SupabaseManager.shared.client.from("notes").insert(noteData).execute()
-                        print("Not eklendi")
-                        self.loadNotes()
-                        
-                    } catch {
-                        print("Note eklenemedi")
-                    }
-                }
+                // Öncelik durumunu seçme ekranı açılacak
+                self?.showPriorityPicker(content: note)
             }
         }
         
@@ -86,7 +87,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
             self.view.endEditing(true)
         }
                 
-        addNoteAlert.addAction(noteSaveButton)
+        addNoteAlert.addAction(nextButton)
         addNoteAlert.addAction(noteCancelButton)
         self.present(addNoteAlert, animated: true, completion: nil)
     }
@@ -94,28 +95,57 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func loadNotes() {
         Task {
             do {
-                // Giriş yapan kullanıcı alıyoruz
+                
                 let user = try await SupabaseManager.shared.client.auth.session.user
                 
-                // Aldığımız bu kullanıcının notlarını çekiyoruz
+                // Giriş yapan kullanıcının notlarını çekiyoruz
                 let response: [Note] = try await SupabaseManager.shared.client
                     .from("notes")
                     .select()
                     .eq("user_id", value: user.id)
-                    .order("is_pinned", ascending: false)
-                    .order("created_at", ascending: false)
                     .execute()
                     .value
                 
+                // Manuel sıralama
+                let sortedNotes = response.sorted { note1, note2 in
+                    // 1. Pin durumu (pinliler en üstte olacak)
+                    let pinned1 = note1.is_pinned ?? false
+                    let pinned2 = note2.is_pinned ?? false
+                    
+                    if pinned1 != pinned2 {
+                        return pinned1 && !pinned2
+                    }
+                    
+                    // 2. Öncelik sırası (acil > önemli > normal)
+                    let priority1 = self.priorityValue(note1.priority ?? "normal")
+                    let priority2 = self.priorityValue(note2.priority ?? "normal")
+                    if priority1 != priority2 {
+                        return priority1 > priority2
+                    }
+                    
+                    // 3. Tarih (en yeni üstte)
+                    return (note1.created_at ?? "") > (note2.created_at ?? "")
+                }
+
+                
                 // TableView i güncelliyoruz
                 await MainActor.run {
-                    self.notesArray = response
+                    self.notesArray = sortedNotes
                     self.notesTableView.reloadData()
                 }
                 
             } catch {
                 print("Notlar yüklenemedi: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    func priorityValue(_ priority: String) -> Int {
+        switch priority {
+            case "urgent": return 3
+            case "important": return 2
+            case "normal": return 1
+            default: return 1
         }
     }
     
@@ -250,6 +280,68 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 await MainActor.run {
                     makeAlert(titleInput: "Error", messageInput: error.localizedDescription)
                 }
+            }
+        }
+    }
+    
+    func showPriorityPicker(content: String) {
+        
+        let prioritySheet = UIAlertController(
+            title: "Choose Priority",
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        // Normal butonu
+        let normalAction = UIAlertAction(title: "⚪ Normal", style: .default) { [weak self] _ in
+            self?.saveNote(content: content, priority: "normal")
+        }
+        
+        // Önemli butonu
+        let importantAction = UIAlertAction(title: "🟠 Important", style: .default) { [weak self] _ in
+            self?.saveNote(content: content, priority: "important")
+        }
+        
+        // Acil butonu
+        let urgentAction = UIAlertAction(title: "🔴 Urgent", style: .default) { [weak self] _ in
+            self?.saveNote(content: content, priority: "urgent")
+        }
+        
+        // İptal butonu
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        // Butonları ekle
+        prioritySheet.addAction(normalAction)
+        prioritySheet.addAction(importantAction)
+        prioritySheet.addAction(urgentAction)
+        prioritySheet.addAction(cancelAction)
+        
+        // ActionSheet'i göster
+        present(prioritySheet, animated: true)
+    }
+    
+    func saveNote(content: String, priority: String) {
+        Task {
+            do {
+                let user = try await SupabaseManager.shared.client.auth.session.user
+                
+                let noteData = NoteInsert(
+                    user_id: user.id,
+                    content: content,
+                    is_pinned: false,
+                    priority: priority
+                )
+                
+                try await SupabaseManager.shared.client
+                    .from("notes")
+                    .insert(noteData)
+                    .execute()
+                
+                
+                self.loadNotes()
+                
+            } catch {
+                print("Could not add note: \(error.localizedDescription)")
             }
         }
     }
