@@ -17,8 +17,8 @@ Not oluştururken öncelik seçilmezse otomatik olarak **"Normal"** atanır.
 ### 2. Not Sabitleme
 Kullanıcı, sürekli erişmek istediği önemli notları sabitleyebilir. Sabitlenen notlar liste görünümünde her zaman en üstte yer alır.  
 
-- Not üzerinde bir raptiye/pin ikonu bulunur. Bu ikona tıklandığında not sabitlenir ve listenin en üstüne taşınır.  
-- Tekrar tıklandığında sabitleme kaldırılır ve not normal sıralamasına geri döner.  
+- Not üzerine 2 saniye basılı tutulduğunda not sabitlenir ve listenin en üstüne taşınır.  
+- Tekrar 2 saniye basılı tutulduğunda sabitleme kaldırılır ve not normal sıralamasına geri döner.  
 - Birden fazla not sabitlendiğinde, sabitlenen notlar kendi aralarında oluşturulma tarihine göre sıralanır.
 
 ### 3. Profil Yönetimi
@@ -26,7 +26,7 @@ Uygulamada bir profil sayfası bulunur. Bu sayfada kullanıcı kendi hesap bilgi
 
 **Görüntülenebilir ve düzenlenebilir bilgiler:**
 - **Ad Soyad:** Kullanıcının tam adı  
-- **Email Adresi:** Kayıt sırasında kullanılan ve hatırlatıcı maillerinin gönderileceği adres  
+- **Email Adresi:** Kayıt sırasında kullanılan ve hatırlatıcı maillerinin gönderileceği adres (sadece görüntüleme) 
 - **Profil Fotoğrafı:** Kullanıcı galerisinden veya kameradan fotoğraf seçip yükleyebilir  
 - **Hesap Oluşturma Tarihi:** Uygulamayı kullanmaya başladığı tarih (sadece görüntüleme)  
 
