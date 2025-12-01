@@ -197,23 +197,24 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
     
     // Notu Düzenleme
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
+
         let editAction = UIContextualAction(style: .normal, title: "Düzenle") { [weak self] _, _, completionHandler in
             guard let self = self else { return }
-            
-            // Düzenlenecek notun satırını alır
+
+            // Düzenlenecek not
             let noteToEdit = self.notesArray[indexPath.row]
-            
-            // Düzenleme alert alanı
+
+            // Düzenleme alerti
             let editAlert = UIAlertController(title: "Edit Note", message: nil, preferredStyle: .alert)
             editAlert.addTextField { textField in
                 textField.text = noteToEdit.content
                 textField.placeholder = "Note Content"
             }
-            
-            // Düzenlenen notun kaydolması için basılacak buton
+
+            // 1) SAVE ACTION → sadece içerik güncelle
             let saveAction = UIAlertAction(title: "SAVE", style: .default) { _ in
-                if let newNoteContent = editAlert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines), !newNoteContent.isEmpty {
+                if let newNoteContent = editAlert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+                   !newNoteContent.isEmpty {
                     
                     Task {
                         do {
@@ -223,7 +224,6 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
                                 .eq("id", value: noteToEdit.id)
                                 .execute()
                             
-                            // Notları yeniden yükle
                             self.loadNotes()
                             
                         } catch {
@@ -232,21 +232,32 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     }
                 }
             }
-            
+
+            // Öncelik değiştirme işlemi için alert içine buton ekleme
+            let changePriorityAction = UIAlertAction(title: "CHANGE PRIORITY ->", style: .default) { [weak self] _ in
+                self?.showPriorityPickerForUpdate(noteID: noteToEdit.id)
+            }
+
+            // 3) CANCEL ACTION
+            let cancelAction = UIAlertAction(title: "CANCEL", style: .cancel)
+
+            // 4) Action’ları ekle
+            editAlert.addAction(changePriorityAction)
             editAlert.addAction(saveAction)
-            editAlert.addAction(UIAlertAction(title: "CANCEL", style: .cancel))
-            
+            editAlert.addAction(cancelAction)
+
+            // 5) Alert’i göster
             self.present(editAlert, animated: true)
+
             completionHandler(true)
         }
-        
-        // Sağa kaydırıldığında görünecek butonu rengi mavi ve iconu kalem şeklinde ayarlamak
+
         editAction.backgroundColor = .systemBlue
         editAction.image = UIImage(systemName: "pencil")
-        
-        // Satır kaydırıldığında gösterilecek butonu işaret eder
+
         return UISwipeActionsConfiguration(actions: [editAction])
     }
+
     
     // Uzun basılan satırdaki notu alır ve togglePin (pin değiştirme) fonksiyonuna gönderir
     @objc func handleLongPress(gesture: UILongPressGestureRecognizer) {
@@ -258,6 +269,7 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
         }
     }
+    
     
     // Pin durumunu tersine çevirir
     func togglePin(for note: Note) {
@@ -345,5 +357,48 @@ class NotesViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
         }
     }
+    
+    func updateNotePriority(noteID: Int, newPriority: String) {
+        Task {
+            do {
+                try await SupabaseManager.shared.client
+                    .from("notes")
+                    .update(["priority": newPriority])
+                    .eq("id", value: noteID)
+                    .execute()
+                
+                self.loadNotes()
+
+            } catch {
+                self.makeAlert(titleInput: "Update Error!", messageInput: error.localizedDescription)
+            }
+        }
+    }
+    
+    func showPriorityPickerForUpdate(noteID: Int) {
+        
+        let prioritySheet = UIAlertController(
+            title: "Change Priority",
+            message: nil,
+            preferredStyle: .actionSheet
+        )
+        
+        prioritySheet.addAction(UIAlertAction(title: "⚪ Normal", style: .default) { [weak self] _ in
+            self?.updateNotePriority(noteID: noteID, newPriority: "normal")
+        })
+        
+        prioritySheet.addAction(UIAlertAction(title: "🟠 Important", style: .default) { [weak self] _ in
+            self?.updateNotePriority(noteID: noteID, newPriority: "important")
+        })
+        
+        prioritySheet.addAction(UIAlertAction(title: "🔴 Urgent", style: .default) { [weak self] _ in
+            self?.updateNotePriority(noteID: noteID, newPriority: "urgent")
+        })
+        
+        prioritySheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        present(prioritySheet, animated: true)
+    }
+    
     
 }
